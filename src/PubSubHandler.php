@@ -3,7 +3,7 @@
 /*
  * This file is part of the Allegro framework.
  *
- * (c) 2019 Go Financial Technologies, JSC
+ * (c) 2019,2020 Go Financial Technologies, JSC
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -77,6 +77,11 @@ abstract class PubSubHandler
             $request->acknowledge();
 
         } catch (Exception $ex) {
+            if (get_class($ex) == 'PDOException' && $ex->getCode() == 'HY000') {
+                // PostgreSQL PDO: SQLSTATE[HY000]: General error: 7 no connection to the server
+                $this->log->error("DB connection fail detected", ['exception' => $ex]);
+                throw $ex;
+            }
             $this->handleException($ex);
             sleep(5);
             return;
