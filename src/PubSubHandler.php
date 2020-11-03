@@ -77,9 +77,9 @@ abstract class PubSubHandler
             $request->acknowledge();
 
         } catch (Exception $ex) {
-            if (get_class($ex) == 'PDOException' && $ex->getCode() == 'HY000') {
-                // PostgreSQL PDO: SQLSTATE[HY000]: General error: 7 no connection to the server
-                $this->log->error("DB connection fail detected", ['exception' => $ex]);
+            /** @noinspection MissingService */
+            if ($request->getContainer()->get('app')->isExceptionDeadly($ex)) {
+                $this->log->error("Deadly exception detected", ['exception' => $ex]);
                 throw $ex;
             }
             $this->handleException($ex);
