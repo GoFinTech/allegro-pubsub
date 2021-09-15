@@ -3,7 +3,7 @@
 /*
  * This file is part of the Allegro framework.
  *
- * (c) 2019 Go Financial Technologies, JSC
+ * (c) 2019,2021 Go Financial Technologies, JSC
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -39,13 +39,28 @@ class PubSubApp implements LoggerAwareInterface
     /** @var string */
     private $idleHandlerService;
 
-    public function __construct(AllegroApp $app, string $configSection)
+    /**
+     * PubSubApp constructor.
+     * @param string|AllegroApp $configSection config section name in pubsub.yml.
+     *      Might be an AllegroApp instance for backward compatibility.
+     * @param string|null $legacyConfigSection config section name if app instance is passed as the first argument
+     */
+    public function __construct($configSection, $legacyConfigSection = null)
     {
-        $this->app = $app;
-        $this->log = $app->getLogger();
-        $this->appName = $configSection;
+        $this->app = AllegroApp::resolveConstructorParameters("PubSubApp", $configSection, $legacyConfigSection);
+        $this->log = $this->app->getLogger();
 
-        $this->loadConfiguration($app->getConfigLocator(), $configSection);
+        $this->loadConfiguration($this->app->getConfigLocator(), $configSection);
+    }
+
+    /**
+     * Shorthand for instantiating a PubSubApp with specified config and calling run().
+     * @param string $configSection
+     */
+    public static function exec(string $configSection): void
+    {
+        $app = new PubSubApp($configSection);
+        $app->run();
     }
 
     /**
@@ -62,8 +77,9 @@ class PubSubApp implements LoggerAwareInterface
     private function loadConfiguration(FileLocator $locator, string $configSection): void
     {
         $config = Yaml::parseFile($locator->locate('pubsub.yml'));
-        $pubsub = $config[$configSection];
+        $this->appName = $configSection;
 
+        $pubsub = $config[$configSection];
         $this->subscriptionName = $pubsub['subscription'];
         $this->idleHandlerService = $pubsub['idleHandler'] ?? null;
 

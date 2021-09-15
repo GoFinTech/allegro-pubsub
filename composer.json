@@ -11,7 +11,7 @@
   "require": {
     "php": ">=7.2",
     "ext-json": "*",
-    "gofintech/allegro": "^1.6",
+    "gofintech/allegro": "^1.8",
     "gofintech/allegro-pubsub-client": "^1.0",
     "google/cloud-datastore": "^1.9"
   },
