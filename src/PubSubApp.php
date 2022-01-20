@@ -3,7 +3,7 @@
 /*
  * This file is part of the Allegro framework.
  *
- * (c) 2019,2021 Go Financial Technologies, JSC
+ * (c) 2019-2022 Go Financial Technologies, JSC
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -88,7 +88,7 @@ class PubSubApp implements LoggerAwareInterface
             $messageClass = $handler['messageClass'] ?? null;
 
             if ($messageClass) {
-                /** @var MessageInterface $messageClass */
+                /** @var MessageInterface $$messageClass */
                 $messageType = $messageClass::getMessageType();
                 $this->messageTypes[$messageType] = new MessageTypeInfo($messageType, $messageClass, $handlerService);
             }
@@ -115,6 +115,9 @@ class PubSubApp implements LoggerAwareInterface
         $pubsub = $container->has(PubSubClient::class) ? $container->get(PubSubClient::class)
             : new PubSubClient();
 
+        if (preg_match('/^%[^%]+%$/', $this->subscriptionName, $m)) {
+            $this->subscriptionName = $container->getParameter($m[1]);
+        }
         /** @var Subscription $subscription */
         $subscription = $pubsub->subscription($this->subscriptionName);
 
