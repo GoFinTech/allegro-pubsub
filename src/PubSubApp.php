@@ -115,7 +115,7 @@ class PubSubApp implements LoggerAwareInterface
         $pubsub = $container->has(PubSubClient::class) ? $container->get(PubSubClient::class)
             : new PubSubClient();
 
-        if (preg_match('/^%[^%]+%$/', $this->subscriptionName, $m)) {
+        if (preg_match('/^%([^%]+)%$/', $this->subscriptionName, $m)) {
             $this->subscriptionName = $container->getParameter($m[1]);
         }
         /** @var Subscription $subscription */
